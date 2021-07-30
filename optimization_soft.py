@@ -2,23 +2,24 @@ from functions import *
 
 
 seed = 1
-N = 1  # number of experiments
+N = 3  # number of experiments
 T = 500  # rounds per experiment
-gamma = 0.1
-rs = 1
+gamma = 2
+rs = 0.01
 alpha = 1
 
 np.random.seed(seed)
 
 m = 20 # number of devices
-n = 5  # number of servers
+n = 15  # number of servers
 y_max = 120
 
 wD = np.random.randint(20 ,30 ,m )
 wS = np.random.randint(1 ,4 ,n )
 
-BD = np.random.uniform(5, 15, m)
+BD = np.random.uniform(y_max * 0.1-3, y_max * 0.1+5, m)
 BS = np.random.uniform(y_max * m / n - 100, y_max * m / n + 300, n)
+
 CD = np.random.uniform(100, 200, m)
 
 
@@ -31,7 +32,6 @@ def oracle(y, mu, gamma=0, hard=False):
     return x.value, prob.value, prob.status
 
 
-trace_gen = Trace(m, n, seed)
 reg = np.zeros((N, T))
 
 # statistics
@@ -43,15 +43,19 @@ x_opt_N_T = np.zeros((N, T, n + 1, m)) #yuhang yao
 x_t_N_T = np.zeros((N, T, n + 1, m)) #yuhang yao
 
 for u in range(N):
-    mu = np.random.rand(m, n)/2 + 0.5
-    fast_link = np.random.choice(n, m)
-    for i in range(m):
-        mu[i, fast_link[i]] *= 0.1
+    # mu = np.random.rand(m, n)/4 + 0.75
+    # fast_link = np.random.choice(n, m)
+    # for i in range(m):
+    #     mu[i, fast_link[i]] *= 0.02
+
+    # trace_gen = Trace(m, n, seed + u)
     # mu = trace_gen.avg()
-    mu_hat = np.zeros_like(mu)  # empirical mean
+
+    mu = np.random.rand(m, n)
+    mu_hat = np.random.random(mu.shape)  # empirical mean
     T_ij = np.ones_like(mu)  # total number of times arm (i,j) is played
     for t in range(T):
-        y = np.random.uniform(y_max-5, y_max, m).astype(int)
+        y = np.random.uniform(y_max-40, y_max, m).astype(int)
         x_opt, f_opt, status = oracle(y, mu, gamma)
 
         if 'optimal' not in status:
@@ -62,7 +66,7 @@ for u in range(N):
         stats[u, t] = np.array([fv, dv, ev])
 
         rho_ij = np.sqrt(3 * np.log(t + 1) / (2 * T_ij)) * rs
-        mu_bar = np.max(mu_hat - rho_ij, 0)  # LCB
+        mu_bar = np.clip(mu_hat - rho_ij, 0, None)  # LCB
 
         x_t, f_t, status = oracle(y, mu_bar, gamma)
         if 'optimal' not in status:
@@ -71,14 +75,14 @@ for u in range(N):
         f_t, *_ = f(x_t, y, mu, gamma)
 
         # sample j based on x_t[i], observe c_ij, update mu_hat[i,j]
-        c = trace_gen.generate()
+        # c = trace_gen.generate()
         for i in range(m):
             j = np.random.choice(n + 1, p=x_t[:, i])
             if j != 0:
                 j -= 1
-                # c_ij = int(np.random.rand() < mu[i, j])
-                a = np.random.rand() * 3
-                c_ij = np.random.beta(a, a * (1-mu[i, j])/mu[i, j]) # beta distribution
+                c_ij = int(np.random.rand() < mu[i, j])
+                # a = np.random.rand() * 3
+                # c_ij = np.random.beta(a, a * (1-mu[i, j])/mu[i, j]) # beta distribution
                 # c_ij = c[i,j] #trace
 
                 T_ij[i, j] += 1
@@ -107,20 +111,20 @@ plt.show()
 
 
 #yuhang yao
-Data_num_D_N_T = np.zeros((N, T, wD.shape[0]))
-Data_num_S_N_T = np.zeros((N, T, wS.shape[0]))
-for u in range(N):
-    for t in range(T):
-        Data_num_S_N_T[u, t] = wS
-        Data_num_D_N_T[u, t] = wD
-        for i in range(m):
-                    j = np.random.choice(n + 1, p=x_t_N_T[u, t, :, i])
-                    if j != 0:
-                        j -= 1
-                        Data_num_S_N_T[u, t, j] += y_N_T[u, t, i] #upload to device j-1
-                    else:
-                        Data_num_D_N_T[u, t, i] += y_N_T[u, t, i] #stay in local device
-
-
+# Data_num_D_N_T = np.zeros((N, T, wD.shape[0]))
+# Data_num_S_N_T = np.zeros((N, T, wS.shape[0]))
+# for u in range(N):
+#     for t in range(T):
+#         Data_num_S_N_T[u, t] = wS
+#         Data_num_D_N_T[u, t] = wD
+#         for i in range(m):
+#                     j = np.random.choice(n + 1, p=x_t_N_T[u, t, :, i])
+#                     if j != 0:
+#                         j -= 1
+#                         Data_num_S_N_T[u, t, j] += y_N_T[u, t, i] #upload to device j-1
+#                     else:
+#                         Data_num_D_N_T[u, t, i] += y_N_T[u, t, i] #stay in local device
+#
+#
 
 

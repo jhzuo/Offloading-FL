@@ -68,7 +68,8 @@ def optimization(m, n, wD, wS, y, mu, BD, BS, gamma, hard, alpha, CD=None):
                    cp.sum(x, 0) == 1]
 
     if hard:
-        constraints.append(mu @ (x[1:, :] @ y) <= CD)
+        for i in range(m):
+            constraints.append(y[i] * cp.sum(cp.multiply(mu[i, :], x[1:, i])) <= CD[i])
 
     prob = cp.Problem(cp.Minimize(obj), constraints)
     prob.solve()  # Returns the optimal value.
