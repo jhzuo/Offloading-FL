@@ -18,6 +18,7 @@ def mnist_iid(dataset, num_users):
     for i in range(num_users):
         dict_users[i] = set(np.random.choice(all_idxs, num_items, replace=False))
         all_idxs = list(set(all_idxs) - dict_users[i])
+        dict_users[i] = np.array(list(dict_users[i]))
     return dict_users
 
 
