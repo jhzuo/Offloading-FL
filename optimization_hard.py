@@ -77,16 +77,26 @@ for u in range(N):
         if 'optimal' not in status:
             print('Solution infeasible 2')
             break
-
-        # mapping from x_tmp to x_t
+        
+        # mapping from x_tmp to x_t (new)
         x_t = np.zeros((n + 1, m))
         for i in range(m):
             cost = y[i] * mu[i,:].dot(x_tmp[1:, i])
             if cost > CD[i]:
-                x_t[1:, i] = CD[i] / cost * x_tmp[1:, i]
-                x_t[0, i] = 1 - np.sum(x_t[1:, i])
+                x_t[1:, i] = mu_bar[i] / mu[i] * x_tmp[1:, i]
+                x_t[0, i] = np.minimum(1-np.sum(x_t[1:, i]), BD[i]/y[i])
             else:
                 x_t[:, i] = x_tmp[:, i]
+
+        # # mapping from x_tmp to x_t
+        # x_t = np.zeros((n + 1, m))
+        # for i in range(m):
+        #     cost = y[i] * mu[i,:].dot(x_tmp[1:, i])
+        #     if cost > CD[i]:
+        #         x_t[1:, i] = CD[i] / cost * x_tmp[1:, i]
+        #         x_t[0, i] = 1 - np.sum(x_t[1:, i])
+        #     else:
+        #         x_t[:, i] = x_tmp[:, i]
 
         f_t, *_ = f(x_t, y, mu, 0)
 
