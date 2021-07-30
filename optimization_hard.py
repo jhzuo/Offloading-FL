@@ -12,7 +12,7 @@ n = 5  # number of servers
 wD = np.random.randint(1, 4, m)
 wS = np.random.randint(1, 4, n)
 
-BD = np.random.uniform(100, 400, m)
+BD = np.random.uniform(80, 120, m)
 BS = np.random.uniform(100, 300, n)
 CD = np.random.uniform(300, 600, m)
 
@@ -41,9 +41,9 @@ x_t_N_T = np.zeros((N, T, n + 1, m)) #yuhang yao
 
 
 for u in range(N):
-    mu = np.random.rand(m, n)
-    # mu = trace_gen.avg()
-    mu_hat = np.zeros_like(mu)  # empirical mean
+    # mu = np.random.rand(m, n)
+    mu = trace_gen.avg()
+    mu_hat = np.ones_like(mu)  # empirical mean
     T_ij = np.ones_like(mu)  # total number of times arm (i,j) is played
     for t in range(T):
         y = np.random.uniform(80, 120, m).astype(int)
