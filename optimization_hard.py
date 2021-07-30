@@ -113,6 +113,8 @@ Data_num_D_N_T = np.zeros((N, T, wD.shape[0]))
 Data_num_S_N_T = np.zeros((N, T, wS.shape[0]))
 for u in range(N):
     for t in range(T):
+        Data_num_S_N_T[u, t] = wS
+        Data_num_D_N_T[u, t] = wD
         for i in range(m):
                     j = np.random.choice(n + 1, p=x_t_N_T[u, t, :, i])
                     if j != 0:
