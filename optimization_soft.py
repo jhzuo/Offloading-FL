@@ -13,6 +13,7 @@ np.random.seed(seed)
 m = 20 # number of devices
 n = 15  # number of servers
 y_max = 120
+y_min = 80
 
 wD = np.random.randint(20 ,30 ,m )
 wS = np.random.randint(1 ,4 ,n )
@@ -52,14 +53,14 @@ for u in range(N):
     # mu = trace_gen.avg()
 
     mu = np.random.rand(m, n)
-    mu_hat = np.random.random(mu.shape)  # empirical mean
+    mu_hat = np.zeros_like(mu)  # empirical mean
     T_ij = np.ones_like(mu)  # total number of times arm (i,j) is played
     for t in range(T):
-        y = np.random.uniform(y_max-40, y_max, m).astype(int)
+        y = np.random.uniform(y_min, y_max, m).astype(int)
         x_opt, f_opt, status = oracle(y, mu, gamma)
 
         if 'optimal' not in status:
-            print('Solution infeasible')
+            print('Solution infeasible 1')
             break
 
         fv, *_, dv, ev = f(x_opt, y, mu, gamma)
