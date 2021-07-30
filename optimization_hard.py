@@ -68,6 +68,7 @@ for u in range(N):
             if cost > CD[i]:
                 x_t[1:, i] = CD[i] / cost * x_tmp[1:, i]
                 x_t[0, i] = 1 - np.sum(x_t[1:, i])
+                print('rescaled')
             else:
                 x_t[:, i] = x_tmp[:, i]
 

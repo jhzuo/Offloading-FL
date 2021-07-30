@@ -39,17 +39,17 @@ class Trace(object):
         return rt
 
 
-def objective(x, y, mu, wD, wS, m, n, gamma):
+def objective(x, y, mu, wD, wS, m, n, gamma, alpha):
     a = np.multiply(x[0, :], y)
     b = x[1:, :] @ y
     c = mu @ b
-    d = np.sum(1 / np.sqrt(a + wD)) \
+    d = np.sum(alpha / np.sqrt(a + wD)) \
         + np.sum(1 / np.sqrt(np.sqrt(b + wS)))
     e = np.sum(c) / m / n
     return d + gamma * e, np.average(a), np.average(b), np.average(c), np.average(d), gamma * np.average(e)
 
 
-def optimization(m, n, wD, wS, y, mu, BD, BS, gamma, hard, CD=None):
+def optimization(m, n, wD, wS, y, mu, BD, BS, gamma, hard, alpha, CD=None):
     if hard:
         gamma = 0
         assert CD is not None, 'Hard CD constraint missing'
@@ -59,7 +59,7 @@ def optimization(m, n, wD, wS, y, mu, BD, BS, gamma, hard, CD=None):
 
     x = cp.Variable((n + 1, m), nonneg=True)
 
-    obj = cp.sum(cp.inv_pos(cp.sqrt(cp.multiply(x[0, :], y) + wD))) \
+    obj = cp.sum(alpha * cp.inv_pos(cp.sqrt(cp.multiply(x[0, :], y) + wD))) \
           + cp.sum(cp.inv_pos(cp.sqrt(x[1:, :] @ y + wS))) + gamma * cp.sum(mu @ (x[1:, :] @ y)) / m / n
 
     constraints = [0 <= x, x <= 1,
