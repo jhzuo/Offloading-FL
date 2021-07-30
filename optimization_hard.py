@@ -34,6 +34,12 @@ reg = np.zeros((N, T))
 # statistics
 stats = np.zeros((N, T, 3))
 
+#records all y, x_opt, x_t #yuhang yao
+y_N_T = np.zeros((N, T, m)) #yuhang yao
+x_opt_N_T = np.zeros((N, T, n + 1, m)) #yuhang yao
+x_t_N_T = np.zeros((N, T, n + 1, m)) #yuhang yao
+
+
 for u in range(N):
     mu = np.random.rand(m, n)
     # mu = trace_gen.avg()
@@ -83,6 +89,11 @@ for u in range(N):
 
         # calculate regert
         reg[u, t] = f_t - f_opt
+        
+        y_N_T[u, t] = y#yuhang yao
+        x_opt_N_T[u, t] = x_opt#yuhang yao
+        x_t_N_T[u, t] = x_t#yuhang yao
+        
 
 plt.plot(np.cumsum(reg, axis=1).T)
 f_avg = np.average(stats[:, :, 0], 1)
@@ -94,3 +105,21 @@ for i in range(N):
 plt.legend(legend)
 plt.title('Hard, rs=%.2f, mu_avg=%.2f' %(rs, np.average(mu)))
 plt.show()
+
+
+
+#yuhang yao
+Data_num_D_N_T = np.zeros((N, T, wD.shape[0]))
+Data_num_S_N_T = np.zeros((N, T, wS.shape[0]))
+for u in range(N):
+    for t in range(T):
+        for i in range(m):
+                    j = np.random.choice(n + 1, p=x_t_N_T[u, t, :, i])
+                    if j != 0:
+                        j -= 1
+                        Data_num_S_N_T[u, t, j] += y_N_T[u, t, i] #upload to device j-1
+                    else:
+                        Data_num_D_N_T[u, t, i] += y_N_T[u, t, i] #stay in local device
+
+
+
