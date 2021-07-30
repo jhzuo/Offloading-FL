@@ -36,8 +36,8 @@ reg = np.zeros((N, T))
 stats = np.zeros((N, T, 3))
 
 for u in range(N):
-    # mu = np.random.rand(m, n)
-    mu = trace_gen.avg()
+    mu = np.random.rand(m, n)
+    # mu = trace_gen.avg()
     mu_hat = np.zeros_like(mu)  # empirical mean
     T_ij = np.ones_like(mu)  # total number of times arm (i,j) is played
     for t in range(T):
@@ -64,9 +64,9 @@ for u in range(N):
             if j != 0:
                 j -= 1
                 # c_ij = int(np.random.rand() < mu[i, j])
-                # a = np.random.rand() * 3
-                # c_ij = np.random.beta(a, a * (1-mu[i, j])/mu[i, j]) # beta distribution
-                c_ij = c[i,j] #trace
+                a = np.random.rand() * 3
+                c_ij = np.random.beta(a, a * (1-mu[i, j])/mu[i, j]) # beta distribution
+                # c_ij = c[i,j] #trace
 
                 T_ij[i, j] += 1
                 mu_hat[i, j] += (c_ij - mu_hat[i, j]) / T_ij[i, j]
@@ -82,4 +82,5 @@ legend = []
 for i in range(N):
     legend.append('obj=%.2f, cst=%.2f' %(obj_avg[i], cons_avg[i]))
 plt.legend(legend)
+plt.title('Soft, rs=%.2f, mu_avg=%.2f' %(rs, np.average(mu)))
 plt.show()
