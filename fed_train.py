@@ -86,6 +86,9 @@ def fed_T(L_T, dataset_name, iid = True):
     val_acc_list, net_list = [], []
 
     w_locals = [w_glob for i in range(args.num_users)]
+    
+    acc_tests = []
+    loss_tests = []
         
     
     for Round in range(args.epochs):
@@ -125,8 +128,10 @@ def fed_T(L_T, dataset_name, iid = True):
 
             print("Testing accuracy: {:.2f}".format(acc_test))
             print("Testing loss: {:.2f}".format(loss_test))
+            acc_tests.append(acc_test)
+            loss_tests.append(loss_test)
 
-    return loss_train, accuracy_train, acc_test, loss_test, args
+    return loss_train, accuracy_train, acc_tests, loss_tests, args
 
 
 
