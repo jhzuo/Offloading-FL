@@ -78,6 +78,7 @@ def fed_T(L_T, dataset_name, iid = True):
 
     # training
     loss_train = []
+    accuracy_train = []
     cv_loss, cv_acc = [], []
     val_loss_pre, counter = 0, 0
     net_best = None
@@ -90,13 +91,15 @@ def fed_T(L_T, dataset_name, iid = True):
     for Round in range(args.epochs):
         
             loss_locals = []
+            accuracy_locals = []
             
             idxs_users = range(args.num_users)
             for idx in idxs_users:
                 local = LocalUpdate(args=args, dataset=dataset_train, idxs=np.random.choice(dict_users[idx], L_T[Round][idx]))
-                w, loss = local.train(net=copy.deepcopy(net_glob).to(args.device))
+                w, loss, accuracy = local.train(net=copy.deepcopy(net_glob).to(args.device))
                 w_locals[idx] = copy.deepcopy(w)
                 loss_locals.append(copy.deepcopy(loss))
+                accuracy_locals.append(accuracy)
             # update global weights
 
             w_glob = FedAvg(w_locals, L_T[Round]) #
@@ -106,21 +109,24 @@ def fed_T(L_T, dataset_name, iid = True):
 
             # print loss
             loss_avg = sum(loss_locals) / len(loss_locals)
-            print('Round {:3d}, Average loss {:.3f}'.format(Round, loss_avg))
+            
+            
+            accuracy_avg = sum(accuracy_locals) / len(accuracy_locals)
+            print('Round {:3d}, Average Train loss {:.3f}, Average Train Accuracy {:.3f}'.format(Round, loss_avg, accuracy_avg))
+            
             loss_train.append(loss_avg)
+            accuracy_train.append(accuracy_avg)
 
     
 
-            # testing
-            net_glob.eval()
-            acc_train_final, loss_train_final = test_img(net_glob, dataset_train, args)
-            acc_test, loss_test = test_img(net_glob, dataset_test, args)
-            print("Training accuracy: {:.2f}".format(acc_train_final))
-            print("Training loss: {:.2f}".format(loss_train_final))
-            print("Testing accuracy: {:.2f}".format(acc_test))
-            print("Testing loss: {:.2f}".format(loss_test))
+    # testing
+    net_glob.eval()
+    acc_test, loss_test = test_img(net_glob, dataset_test, args)
+            
+    print("Testing accuracy: {:.2f}".format(acc_test))
+    print("Testing loss: {:.2f}".format(loss_test))
     
-    return loss_train, acc_train_final, loss_train_final, acc_test, loss_test, args
+    return loss_train, accuracy_train, acc_test, loss_test, args
 
 
 
