@@ -42,7 +42,7 @@ def fed_T(L_T, dataset_name, iid = True):
         if args.iid:
             dict_users = mnist_iid(dataset_train, args.num_users)
         else:
-            dict_users = mnist_noniid(dataset_train, args.num_users)
+            dict_users = mnist_noniid(dataset_train, 100)#args.num_users)
     elif args.dataset == 'cifar':
         trans_cifar = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
         dataset_train = datasets.CIFAR10('../data/cifar', train=True, download=True, transform=trans_cifar)
@@ -111,12 +111,14 @@ def fed_T(L_T, dataset_name, iid = True):
 
     
 
-    # testing
-    net_glob.eval()
-    acc_train_final, loss_train_final = test_img(net_glob, dataset_train, args)
-    acc_test, loss_test = test_img(net_glob, dataset_test, args)
-    print("Training accuracy: {:.2f}".format(acc_train_final))
-    print("Testing accuracy: {:.2f}".format(acc_test))
+            # testing
+            net_glob.eval()
+            acc_train_final, loss_train_final = test_img(net_glob, dataset_train, args)
+            acc_test, loss_test = test_img(net_glob, dataset_test, args)
+            print("Training accuracy: {:.2f}".format(acc_train_final))
+            print("Training loss: {:.2f}".format(loss_train_final))
+            print("Testing accuracy: {:.2f}".format(acc_test))
+            print("Testing loss: {:.2f}".format(loss_test))
     
     return loss_train, acc_train_final, loss_train_final, acc_test, loss_test, args
 
