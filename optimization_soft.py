@@ -25,11 +25,11 @@ CD = np.random.uniform(100, 200, m)
 
 
 def f(x, y, mu, gamma=1):
-    return objective(x, y, mu, wD, wS, m, n, gamma, alpha)
+    return objective(x, y, mu, wD, wS, m, n, gamma, alpha, BD, BS, CD=None)
 
 # min f(x, y. mu)
 def oracle(y, mu, gamma=0, hard=False):
-    x, prob = optimization(m, n, wD, wS, y, mu, BD, BS, gamma, hard, alpha, CD=CD)
+    x, prob = optimization(m, n, wD, wS, y, mu, BD, BS, gamma, hard, alpha)
     return x.value, prob.value, prob.status
 
 
@@ -109,23 +109,5 @@ plt.title('Soft, rs=%.2f, mu_avg=%.2f, gamma=%.2f' %(rs, np.average(mu), gamma))
 plt.show()
 
 
-
-
-#yuhang yao
-# Data_num_D_N_T = np.zeros((N, T, wD.shape[0]))
-# Data_num_S_N_T = np.zeros((N, T, wS.shape[0]))
-# for u in range(N):
-#     for t in range(T):
-#         Data_num_S_N_T[u, t] = wS
-#         Data_num_D_N_T[u, t] = wD
-#         for i in range(m):
-#                     j = np.random.choice(n + 1, p=x_t_N_T[u, t, :, i])
-#                     if j != 0:
-#                         j -= 1
-#                         Data_num_S_N_T[u, t, j] += y_N_T[u, t, i] #upload to device j-1
-#                     else:
-#                         Data_num_D_N_T[u, t, i] += y_N_T[u, t, i] #stay in local device
-#
-#
 
 

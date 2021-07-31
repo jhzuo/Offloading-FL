@@ -39,14 +39,20 @@ class Trace(object):
         return rt
 
 
-def objective(x, y, mu, wD, wS, m, n, gamma, alpha):
+def objective(x, y, mu, wD, wS, m, n, gamma, alpha, BD, BS, CD=None):
     a = np.multiply(x[0, :], y)
+    at = np.minimum(a, BD)
     b = x[1:, :] @ y
-    c = mu @ b
-    d = np.sum(alpha / np.sqrt(a + wD)) \
-        + np.sum(1 / np.sqrt(np.sqrt(b + wS)))
-    e = np.sum(c) / m / n
-    return d + gamma * e, np.average(a), np.average(b), np.average(c), np.average(d), gamma * np.average(e)
+    bt = np.minimum(b, BS)
+    c = np.multiply(y, np.diag(mu @ x[1:, :]))
+    ct = c
+    if CD is not None:
+        ct = np.minimum(c, CD)
+
+    d = np.sum(alpha / np.sqrt(at + wD)) \
+        + np.sum(1 / np.sqrt(np.sqrt(bt + wS)))
+    e = np.sum(ct)
+    return d + gamma * e, np.average(at), np.average(bt), np.average(ct), d, gamma * e
 
 
 def optimization(m, n, wD, wS, y, mu, BD, BS, gamma, hard, alpha, CD=None):
@@ -60,7 +66,7 @@ def optimization(m, n, wD, wS, y, mu, BD, BS, gamma, hard, alpha, CD=None):
     x = cp.Variable((n + 1, m), nonneg=True)
 
     obj = cp.sum(alpha * cp.inv_pos(cp.sqrt(cp.multiply(x[0, :], y) + wD))) \
-          + cp.sum(cp.inv_pos(cp.sqrt(x[1:, :] @ y + wS))) + gamma * cp.sum(mu @ (x[1:, :] @ y)) / m / n
+          + cp.sum(cp.inv_pos(cp.sqrt(x[1:, :] @ y + wS))) + gamma * cp.sum(cp.multiply(cp.diag(mu @ x[1:, :]), y) )
 
     constraints = [0 <= x, x <= 1,
                    cp.multiply(x[0, :], y) <= BD,
