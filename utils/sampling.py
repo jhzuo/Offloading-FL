@@ -22,7 +22,7 @@ def mnist_iid(dataset, num_users):
     return dict_users
 
 
-def mnist_noniid(dataset, num_users):
+def mnist_noniid(dataset, num_users, L_T):
     """
     Sample non-I.I.D client data from MNIST dataset
     :param dataset:
@@ -42,7 +42,9 @@ def mnist_noniid(dataset, num_users):
 
     # divide and assign
     for i in range(num_users):
-        rand_set = set(np.random.choice(idx_shard, len(idxs) // (num_users * num_imgs), replace=False))
+        #rand_set = set(np.random.choice(idx_shard, len(idxs) // (num_users * num_imgs), replace=False))
+        
+        rand_set = set(np.random.choice(idx_shard, int(50 * (L_T.sum(axis = 0) / L_T.sum())[i] - 5), replace=False))
         idx_shard = list(set(idx_shard) - rand_set)
         for rand in rand_set:
             dict_users[i] = np.concatenate((dict_users[i], idxs[rand*num_imgs:(rand+1)*num_imgs]), axis=0)
