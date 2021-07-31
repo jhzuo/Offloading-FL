@@ -11,18 +11,19 @@ alpha = 1
 np.random.seed(seed)
 
 m = 20  # number of devices
-n = 5  # number of servers
+n = 10  # number of servers
 y_max = 120
-y_min = 100
+y_min = 115
 
 wD = np.random.randint(1, 4, m)
 wS = np.random.randint(1, 4, n)
 
 BD = np.random.uniform(y_max/n/2, y_max/n/2+5, m)
-BS = np.random.uniform(y_max * m / n - 100, y_max * m / n + 300, n)
+# BS = np.random.uniform(y_max * m / n - 100, y_max * m / n + 300, n)
+BS = np.random.uniform(y_max * m / n +1000, y_max * m / n + 3000, n)
 
-# CD = np.random.uniform(y_min/4*3, y_max/4*3, m)
-CD = np.ones(m) * y_max
+CD = np.random.uniform(y_min/3*2, y_max/3*2, m)
+# CD = np.ones(m) * y_max
 
 # f(x, y, mu)
 def f(x, y, mu, gamma=1):
@@ -37,7 +38,7 @@ def oracle(y, mu, gamma=0, hard=False):
 reg = np.zeros((N, T))
 
 # statistics
-stats = np.zeros((N, T, 5))
+stats = np.zeros((N, T, 6))
 
 #records all y, x_opt, x_t #yuhang yao
 y_N_T = np.zeros((N, T, m)) #yuhang yao
@@ -47,15 +48,18 @@ x_t_N_T = np.zeros((N, T, n + 1, m)) #yuhang yao
 
 for u in range(N):
     mu = np.random.rand(m, n)/4 + 0.75
-    fast_link = np.random.choice(n, m)
-    for i in range(m):
-        mu[i, fast_link[i]] *= 0.02
+    # fast_link = np.random.choice(n, m)
+    # for i in range(m):
+    #     mu[i, fast_link[i]] *= 0.02
+    fast_link = np.random.choice(n)
+    mu[:, fast_link] *= 0.02
 
     # trace_gen = Trace(m, n, seed + u)
     # mu = trace_gen.avg()
 
     # mu = np.random.rand(m, n)
-    mu_hat = np.ones_like(mu)  # empirical mean
+    # mu_hat = np.zeros_like(mu)  # empirical mean
+    mu_hat = np.zeros_like(mu)
     T_ij = np.ones_like(mu)  # total number of times arm (i,j) is played
     for t in range(T):
         y = np.random.uniform(y_min, y_max, m).astype(int)
@@ -84,19 +88,10 @@ for u in range(N):
             cost = y[i] * mu[i,:].dot(x_tmp[1:, i])
             if cost > CD[i]:
                 x_t[1:, i] = mu_bar[i] / mu[i] * x_tmp[1:, i]
-                x_t[0, i] = np.minimum(1-np.sum(x_t[1:, i]), BD[i]/y[i])
+                # x_t[0, i] = np.minimum(1-np.sum(x_t[1:, i]), BD[i]/y[i])
+                x_t[0, i] = 1-np.sum(x_t[1:, i])
             else:
                 x_t[:, i] = x_tmp[:, i]
-
-        # # mapping from x_tmp to x_t
-        # x_t = np.zeros((n + 1, m))
-        # for i in range(m):
-        #     cost = y[i] * mu[i,:].dot(x_tmp[1:, i])
-        #     if cost > CD[i]:
-        #         x_t[1:, i] = CD[i] / cost * x_tmp[1:, i]
-        #         x_t[0, i] = 1 - np.sum(x_t[1:, i])
-        #     else:
-        #         x_t[:, i] = x_tmp[:, i]
 
         f_t, *_ = f(x_t, y, mu, 0)
 
@@ -134,8 +129,7 @@ plt.title('Hard, rs=%.2f, mu_avg=%.2f' %(rs, np.average(mu)))
 
 plt.figure()
 plt.plot(reg.T)
-plt.figure()
-plt.plot(stats[:,:,3].T)
+
 plt.show()
 
 
