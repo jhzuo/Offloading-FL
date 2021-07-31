@@ -4,7 +4,7 @@ from functions import *
 seed = 1
 N = 3  # number of experiments
 T = 500  # rounds per experiment
-gamma = 2
+gamma = 0.1
 rs = 0.01
 alpha = 1
 

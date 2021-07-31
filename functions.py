@@ -38,8 +38,24 @@ class Trace(object):
                 rt[i, j] = self.average[self.trace_selection[i, j]]
         return rt
 
+#
+# def objective(x, y, mu, wD, wS, m, n, gamma, alpha, BD, BS, CD=None):
+#     a = np.multiply(x[0, :], y)
+#     at = np.minimum(a, BD)
+#     b = x[1:, :] @ y
+#     bt = np.minimum(b, BS)
+#     c = np.multiply(y, np.diag(mu @ x[1:, :]))
+#     ct = c
+#     if CD is not None:
+#         ct = np.minimum(c, CD)
+#
+#     d = np.sum(alpha / np.sqrt(at + wD)) \
+#         + np.sum(1 / np.sqrt(np.sqrt(bt + wS)))
+#     e = np.sum(ct)
+#     return d + gamma * e, np.average(at), np.average(bt), np.average(ct), d, gamma * e
 
-def objective(x, y, mu, wD, wS, m, n, gamma, alpha, BD, BS, CD=None):
+
+def objective(x, y, mu, wD, wS, m, n, gamma, alpha, beta, BD, BS, CD=None):
     a = np.multiply(x[0, :], y)
     at = np.minimum(a, BD)
     b = x[1:, :] @ y
@@ -50,12 +66,12 @@ def objective(x, y, mu, wD, wS, m, n, gamma, alpha, BD, BS, CD=None):
         ct = np.minimum(c, CD)
 
     d = np.sum(alpha / np.sqrt(at + wD)) \
-        + np.sum(1 / np.sqrt(np.sqrt(bt + wS)))
+        + np.sum(beta / np.sqrt(np.sqrt(bt + wS)))
     e = np.sum(ct)
     return d + gamma * e, np.average(at), np.average(bt), np.average(ct), d, gamma * e
 
 
-def optimization(m, n, wD, wS, y, mu, BD, BS, gamma, hard, alpha, CD=None):
+def optimization(m, n, wD, wS, y, mu, BD, BS, gamma, hard, alpha, beta, CD=None):
     if hard:
         gamma = 0
         assert CD is not None, 'Hard CD constraint missing'
@@ -65,9 +81,12 @@ def optimization(m, n, wD, wS, y, mu, BD, BS, gamma, hard, alpha, CD=None):
 
     x = cp.Variable((n + 1, m), nonneg=True)
 
+    # obj = cp.sum(alpha * cp.inv_pos(cp.sqrt(cp.multiply(x[0, :], y) + wD))) \
+    #       + cp.sum(cp.inv_pos(cp.sqrt(x[1:, :] @ y + wS))) \
+    #       + gamma * cp.sum(cp.multiply(cp.diag(mu @ x[1:, :]), y) )
     obj = cp.sum(alpha * cp.inv_pos(cp.sqrt(cp.multiply(x[0, :], y) + wD))) \
-          + cp.sum(cp.inv_pos(cp.sqrt(x[1:, :] @ y + wS))) + gamma * cp.sum(cp.multiply(cp.diag(mu @ x[1:, :]), y) )
-
+          + beta @ cp.inv_pos(cp.sqrt(x[1:, :] @ y + wS)) \
+          + gamma * cp.sum(cp.multiply(cp.diag(mu @ x[1:, :]), y) )
     constraints = [0 <= x, x <= 1,
                    cp.multiply(x[0, :], y) <= BD,
                    x[1:, :] @ y <= BS,
