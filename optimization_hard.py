@@ -44,7 +44,7 @@ stats = np.zeros((N, T, 6))
 y_N_T = np.zeros((N, T, m)) #yuhang yao
 x_opt_N_T = np.zeros((N, T, n + 1, m)) #yuhang yao
 x_t_N_T = np.zeros((N, T, n + 1, m)) #yuhang yao
-
+j_N_T = np.zeros((N, T, m))#yuhang yao
 
 for u in range(N):
     mu = np.random.rand(m, n)/4 + 0.75
@@ -99,6 +99,7 @@ for u in range(N):
         # c = trace_gen.generate()
         for i in range(m):
             j = np.random.choice(n + 1, p=x_t[:, i])
+            j_N_T[u, t, i] = j #yuhang yao
             if j != 0:
                 j -= 1
                 c_ij = int(np.random.rand() < mu[i, j])

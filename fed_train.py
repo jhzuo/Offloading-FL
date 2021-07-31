@@ -20,7 +20,7 @@ from models.test import test_img
 import sys
 
 
-def fed_T(L_T, dataset_name):
+def fed_T(L_T, dataset_name, iid = True):
     sys.argv = ['']
     args = args_parser()
     
@@ -28,6 +28,7 @@ def fed_T(L_T, dataset_name):
     args.num_users = len(L_T[0])
     args.epochs = len(L_T)
     args.dataset = dataset_name
+    args.iid = iid
     
     
     args.device = torch.device('cuda:{}'.format(args.gpu) if torch.cuda.is_available() and args.gpu != -1 else 'cpu')
@@ -117,7 +118,7 @@ def fed_T(L_T, dataset_name):
     print("Training accuracy: {:.2f}".format(acc_train_final))
     print("Testing accuracy: {:.2f}".format(acc_test))
     
-    return loss_train, args
+    return loss_train, acc_train_final, loss_train_final, acc_test, loss_test, args
 
 
 
